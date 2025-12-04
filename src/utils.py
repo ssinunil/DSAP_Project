@@ -17,9 +17,15 @@ def explore_data(df, ticker_name):
     print(f"  Columns: {df.shape[1]}")
     
     print("\nDate Range:")
-    print(f"  From: {df.index.min().date()}")
-    print(f"  To: {df.index.max().date()}")
-    print(f"  Duration: {(df.index.max() - df.index.min()).days} days")
+    print(f"  From: {df.index.min()}")
+    print(f"  To: {df.index.max()}")
+    
+    # Calculate duration if index is datetime
+    try:
+        duration = (df.index.max() - df.index.min()).days
+        print(f"  Duration: {duration} days")
+    except (AttributeError, TypeError):
+        print(f"  Duration: {len(df)} rows")
     
     print("\nClosing Price Statistics:")
     print(f"  Mean: {df['Close'].mean():.2f} CHF")
@@ -43,7 +49,7 @@ def explore_data(df, ticker_name):
         print("  None - Dataset is complete")
 
 
-def plot_price_history(df, ticker_name):
+def plot_price_history(df, ticker_name, save_path=None):
     """
     Plot stock price history.
     
@@ -61,10 +67,15 @@ def plot_price_history(df, ticker_name):
     plt.grid(True, alpha=0.3)
     
     plt.tight_layout()
+    
+    if save_path:
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        print(f"Graph saved: {save_path}")
+    
     plt.show()
 
 
-def plot_returns_distribution(df, ticker_name):
+def plot_returns_distribution(df, ticker_name, save_path=None):
     """
     Visualize the distribution of daily returns.
     
@@ -104,6 +115,11 @@ def plot_returns_distribution(df, ticker_name):
                 facecolor='wheat', alpha=0.5))
     
     plt.tight_layout()
+    
+    if save_path:
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        print(f"Graph saved: {save_path}")
+    
     plt.show()
 
 

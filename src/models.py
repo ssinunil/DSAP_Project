@@ -4,6 +4,7 @@ Machine learning models for stock prediction.
 
 from sklearn.linear_model import Ridge
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import StandardScaler
 from xgboost import XGBRegressor
 
 
@@ -27,8 +28,21 @@ def create_models():
     """Create the 3 models."""
     models = {
         'Ridge': Ridge(alpha=1.0),
-        'RandomForest': RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42),
-        'XGBoost': XGBRegressor(n_estimators=100, max_depth=5, learning_rate=0.1, random_state=42)
+        'RandomForest': RandomForestRegressor(
+            n_estimators=200,       # More trees
+            max_depth=None,         # No depth limit (let trees grow)
+            min_samples_split=5,    # Minimum samples to split
+            min_samples_leaf=2,     # Minimum samples in leaf
+            random_state=42
+        ),
+        'XGBoost': XGBRegressor(
+            n_estimators=200,       # More iterations
+            max_depth=7,            # Deeper trees
+            learning_rate=0.05,     # Slower learning (more stable)
+            subsample=0.8,          # Use 80% of data per tree
+            colsample_bytree=0.8,   # Use 80% of features per tree
+            random_state=42
+        )
     }
     return models
 
@@ -37,19 +51,26 @@ def train_models(models, X_train, y_train):
     """Train all models."""
     print("\nTraining models...")
     
+    # Scale features for better performance
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    
     for name, model in models.items():
         print(f"  Training {name}...")
-        model.fit(X_train, y_train)
+        model.fit(X_train_scaled, y_train)
     
     print("All models trained!")
-    return models
+    return models, scaler
 
 
-def predict(models, X_test):
+def predict(models, X_test, scaler):
     """Make predictions with all models."""
+    # Scale test data using the same scaler
+    X_test_scaled = scaler.transform(X_test)
+    
     predictions = {}
     
     for name, model in models.items():
-        predictions[name] = model.predict(X_test)
+        predictions[name] = model.predict(X_test_scaled)
     
     return predictions
