@@ -234,61 +234,6 @@ def plot_actual_vs_predicted_scatter(y_test, predictions):
     plt.show()
 
 
-def calculate_relative_performance(results_df):
-    """
-    Calculate relative performance between models.
-    
-    Shows how much better/worse each model is compared to others.
-    Returns a DataFrame with relative comparisons.
-    """
-    print("\n" + "="*70)
-    print("RELATIVE PERFORMANCE ANALYSIS")
-    print("="*70)
-    
-    # Find best and worst for each metric
-    metrics = ['MAE', 'RMSE', 'MAPE']
-    
-    for metric in metrics:
-        best_value = results_df[metric].min()
-        worst_value = results_df[metric].max()
-        
-        print(f"\n{metric}:")
-        print(f" Best:  {results_df.loc[results_df[metric].idxmin(), 'Model']} = {best_value:.2f}")
-        print(f" Worst: {results_df.loc[results_df[metric].idxmax(), 'Model']} = {worst_value:.2f}")
-        
-        # Calculate relative difference
-        if best_value > 0:
-            relative_diff = ((worst_value - best_value) / best_value) * 100
-            print(f"  Relative difference: {relative_diff:.1f}% worse")
-        
-        # Show each model's performance relative to best
-        print("  Performance relative to best:")
-        for _, row in results_df.iterrows():
-            value = row[metric]
-            if best_value > 0:
-                relative = ((value - best_value) / best_value) * 100
-                status = "★ BEST" if value == best_value else f"+{relative:.1f}% worse"
-                print(f"    {row['Model']:12s}: {status}")
-    
-    # R² comparison (higher is better)
-    print("\nR² (higher is better):")
-    best_r2 = results_df['R2'].max()
-    worst_r2 = results_df['R2'].min()
-    print(f"  Best:  {results_df.loc[results_df['R2'].idxmax(), 'Model']} = {best_r2:.4f}")
-    print(f"  Worst: {results_df.loc[results_df['R2'].idxmin(), 'Model']} = {worst_r2:.4f}")
-    
-    print("\n  Variance explained:")
-    for _, row in results_df.iterrows():
-        r2_value = row['R2']
-        variance_explained = r2_value * 100
-        status = "★ BEST" if r2_value == best_r2 else ""
-        print(f"    {row['Model']:12s}: {variance_explained:.1f}% {status}")
-    
-    print("\n" + "="*70)
-    
-    return results_df
-
-
 def create_evaluation_report(results_df, y_test, ticker_name):
     """
     Generate a comprehensive evaluation report.
