@@ -74,12 +74,15 @@ def evaluate_models(predictions, y_test):
     return results_df
 
 
-def plot_predictions(y_test, predictions, ticker_name, save_path=None):
+def plot_predictions(y_test, predictions, ticker_name, output_dir="data/plots"):
     """
     Plot predictions vs actual values for all models.
     
     Creates a line plot comparing actual prices with predicted prices.
     """
+    
+    os.makedirs(output_dir, exist_ok=True)
+    
     plt.figure(figsize=(15, 6))
     
     # Plot actual values
@@ -103,19 +106,23 @@ def plot_predictions(y_test, predictions, ticker_name, save_path=None):
     plt.grid(True, alpha=0.3, linestyle='--')
     plt.tight_layout()
     
-    if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"Graph saved: {save_path}")
     
-    plt.show()
+    filepath = os.path.join(output_dir, f'01_predictions_{ticker_name.replace(".", "_")}.png')
+    plt.savefig(filepath, dpi=300, bbox_inches='tight')
+    print(f"  ✓ Saved: {filepath}")
+    
+    plt.close()
 
 
-def plot_prediction_errors(y_test, predictions, ticker_name, save_path=None):
+def plot_prediction_errors(y_test, predictions, ticker_name, output_dir="data/plots"):
     """
     Plot prediction errors over time for each model.
     
     Shows how the error (actual - predicted) evolves over the test period.
     """
+    
+    os.makedirs(output_dir, exist_ok=True)
+    
     fig, axes = plt.subplots(3, 1, figsize=(15, 10))
     
     colors = ['blue', 'red', 'green']
@@ -145,19 +152,23 @@ def plot_prediction_errors(y_test, predictions, ticker_name, save_path=None):
                 fontsize=16, fontweight='bold')
     plt.tight_layout()
     
-    if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"Graph saved: {save_path}")
     
-    plt.show()
+    filepath = os.path.join(output_dir, f'02_prediction_errors_{ticker_name.replace(".", "_")}.png')
+    plt.savefig(filepath, dpi=300, bbox_inches='tight')
+    print(f"  ✓ Saved: {filepath}")
+    
+    plt.close()
 
 
-def plot_error_distribution(y_test, predictions, save_path=None):
+def plot_error_distribution(y_test, predictions, output_dir="data/plots"):
     """
     Plot distribution of prediction errors for all models.
     
     Creates histograms showing the distribution of errors.
     """
+    
+    os.makedirs(output_dir, exist_ok=True)
+    
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
     
     colors = ['blue', 'red', 'green']
@@ -179,19 +190,23 @@ def plot_error_distribution(y_test, predictions, save_path=None):
                 fontsize=16, fontweight='bold')
     plt.tight_layout()
     
-    if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"Graph saved: {save_path}")
     
-    plt.show()
+    filepath = os.path.join(output_dir, '03_error_distribution.png')
+    plt.savefig(filepath, dpi=300, bbox_inches='tight')
+    print(f"  ✓ Saved: {filepath}")
+    
+    plt.close()
 
 
-def plot_model_comparison(results_df, save_path=None):
+def plot_model_comparison(results_df, output_dir="data/plots"):
     """
     Plot comprehensive bar charts comparing model performances.
     
     Creates a 2x3 grid showing all metrics.
     """
+    
+    os.makedirs(output_dir, exist_ok=True)
+    
     fig, axes = plt.subplots(2, 3, figsize=(15, 10))
     metrics = ['MAE', 'RMSE', 'R2', 'MAPE', 'Max_Error', 'Bias']
     
@@ -215,19 +230,23 @@ def plot_model_comparison(results_df, save_path=None):
                 fontsize=16, fontweight='bold')
     plt.tight_layout()
     
-    if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"Graph saved: {save_path}")
     
-    plt.show()
+    filepath = os.path.join(output_dir, '04_model_comparison.png')
+    plt.savefig(filepath, dpi=300, bbox_inches='tight')
+    print(f"  ✓ Saved: {filepath}")
+    
+    plt.close()
 
 
-def plot_actual_vs_predicted_scatter(y_test, predictions, save_path=None):
+def plot_actual_vs_predicted_scatter(y_test, predictions, output_dir="data/plots"):
     """
     Create scatter plots of actual vs predicted values.
     
     Perfect predictions would lie on the diagonal line.
     """
+    
+    os.makedirs(output_dir, exist_ok=True)
+    
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
     
     colors = ['blue', 'red', 'green']
@@ -252,11 +271,12 @@ def plot_actual_vs_predicted_scatter(y_test, predictions, save_path=None):
                 fontsize=16, fontweight='bold')
     plt.tight_layout()
     
-    if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"Graph saved: {save_path}")
     
-    plt.show()
+    filepath = os.path.join(output_dir, '05_actual_vs_predicted_scatter.png')
+    plt.savefig(filepath, dpi=300, bbox_inches='tight')
+    print(f"  ✓ Saved: {filepath}")
+    
+    plt.close()
 
 
 def calculate_relative_performance(results_df):
@@ -278,8 +298,8 @@ def calculate_relative_performance(results_df):
         worst_value = results_df[metric].max()
         
         print(f"\n{metric}:")
-        print(f"  Best:  {results_df.loc[results_df[metric].idxmin(), 'Model']} = {best_value:.2f}")
-        print(f"  Worst: {results_df.loc[results_df[metric].idxmax(), 'Model']} = {worst_value:.2f}")
+        print(f" Best:  {results_df.loc[results_df[metric].idxmin(), 'Model']} = {best_value:.2f}")
+        print(f" Worst: {results_df.loc[results_df[metric].idxmax(), 'Model']} = {worst_value:.2f}")
         
         # Calculate relative difference
         if best_value > 0:
@@ -325,7 +345,7 @@ def create_evaluation_report(results_df, y_test, ticker_name):
     print("="*70)
     
     print(f"\nStock: {ticker_name}")
-    print(f"Test Period: {y_test.index[0]} to {y_test.index[-1]}")
+    print(f"Test Period: {y_test.index[0].date()} to {y_test.index[-1].date()}")
     print(f"Number of Predictions: {len(y_test)}")
     print(f"Price Range: {y_test.min():.2f} - {y_test.max():.2f} CHF")
     

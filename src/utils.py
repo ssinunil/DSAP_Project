@@ -1,10 +1,8 @@
 """
 Utility functions for data exploration and visualization.
 """
-
 import os
 import matplotlib.pyplot as plt
-
 
 def explore_data(df, ticker_name):
     """Display comprehensive statistics about the data."""
@@ -17,15 +15,9 @@ def explore_data(df, ticker_name):
     print(f"  Columns: {df.shape[1]}")
     
     print("\nDate Range:")
-    print(f"  From: {df.index.min()}")
-    print(f"  To: {df.index.max()}")
-    
-    # Calculate duration if index is datetime
-    try:
-        duration = (df.index.max() - df.index.min()).days
-        print(f"  Duration: {duration} days")
-    except (AttributeError, TypeError):
-        print(f"  Duration: {len(df)} rows")
+    print(f"  From: {df.index.min().date()}")
+    print(f"  To: {df.index.max().date()}")
+    print(f"  Duration: {(df.index.max() - df.index.min()).days} days")
     
     print("\nClosing Price Statistics:")
     print(f"  Mean: {df['Close'].mean():.2f} CHF")
@@ -48,13 +40,15 @@ def explore_data(df, ticker_name):
     else:
         print("  None - Dataset is complete")
 
-
-def plot_price_history(df, ticker_name, save_path=None):
+def plot_price_history(df, ticker_name, output_dir="data/plots"):
     """
     Plot stock price history.
     
     Creates a view of price evolution over time.
     """
+    
+    os.makedirs(output_dir, exist_ok=True)
+    
     plt.figure(figsize=(15, 6))
     
     plt.plot(df.index, df['Close'], linewidth=1.5, 
@@ -68,59 +62,12 @@ def plot_price_history(df, ticker_name, save_path=None):
     
     plt.tight_layout()
     
-    if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"Graph saved: {save_path}")
     
-    plt.show()
-
-
-def plot_returns_distribution(df, ticker_name, save_path=None):
-    """
-    Visualize the distribution of daily returns.
+    filepath = os.path.join(output_dir, f'06_price_history_{ticker_name.replace(".", "_")}.png')
+    plt.savefig(filepath, dpi=300, bbox_inches='tight')
+    print(f"  ✓ Saved: {filepath}")
     
-    Shows histogram and box plot to understand return patterns.
-    """
-    returns = df['Close'].pct_change().dropna() * 100  # Convert to percentage
-    
-    _, axes = plt.subplots(1, 2, figsize=(15, 5))
-    
-    # Histogram
-    axes[0].hist(returns, bins=50, color='steelblue', 
-                edgecolor='black', alpha=0.7)
-    axes[0].axvline(x=0, color='red', linestyle='--', 
-                   linewidth=2, label='Zero Return')
-    axes[0].set_title(f'Returns Distribution - {ticker_name}', 
-                     fontsize=12, fontweight='bold')
-    axes[0].set_xlabel('Daily Return (%)', fontsize=11)
-    axes[0].set_ylabel('Frequency', fontsize=11)
-    axes[0].legend()
-    axes[0].grid(True, alpha=0.3, axis='y')
-    
-    # Box plot
-    axes[1].boxplot(returns, vert=True)
-    axes[1].set_title(f'Returns Box Plot - {ticker_name}', 
-                     fontsize=12, fontweight='bold')
-    axes[1].set_ylabel('Daily Return (%)', fontsize=11)
-    axes[1].grid(True, alpha=0.3, axis='y')
-    
-    # Add statistics
-    stats_text = f'Mean: {returns.mean():.3f}%\n'
-    stats_text += f'Std: {returns.std():.3f}%\n'
-    stats_text += f'Min: {returns.min():.2f}%\n'
-    stats_text += f'Max: {returns.max():.2f}%'
-    
-    axes[1].text(1.15, returns.median(), stats_text,
-                fontsize=10, bbox=dict(boxstyle='round', 
-                facecolor='wheat', alpha=0.5))
-    
-    plt.tight_layout()
-    
-    if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"Graph saved: {save_path}")
-    
-    plt.show()
+    plt.close()
 
 
 def save_results(results_df, filepath="data/processed/results.csv"):

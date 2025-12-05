@@ -1,10 +1,8 @@
 """
 Main script for Swiss stock price prediction project.
 """
-
 # pylint: disable=import-error
 
-import os
 import sys
 import warnings
 
@@ -15,8 +13,9 @@ from feature_engineering import prepare_features
 from models import split_train_test, create_models, train_models, predict
 from evaluation import (evaluate_models, plot_predictions, plot_prediction_errors,
                        plot_error_distribution, plot_model_comparison,
-                       plot_actual_vs_predicted_scatter, create_evaluation_report)
-from utils import explore_data, plot_price_history, plot_returns_distribution, save_results
+                       plot_actual_vs_predicted_scatter, create_evaluation_report,
+                       save_evaluation_results)
+from utils import explore_data, plot_price_history
 
 warnings.filterwarnings('ignore')
 
@@ -30,7 +29,7 @@ def main():
     
     # ========== CONFIGURATION ==========
     TICKERS = ['NESN.SW', 'UBSG.SW', 'NOVN.SW', 'ROG.SW', 'ABBN.SW']
-    SELECTED_TICKER = 'ABBN.SW'
+    SELECTED_TICKER = 'NESN.SW'
     
     START_DATE = "2018-01-01"
     END_DATE = "2024-12-31"
@@ -53,14 +52,7 @@ def main():
     
     df = load_raw_data(SELECTED_TICKER, data_dir="data/raw")
     explore_data(df, SELECTED_TICKER)
-    
-    # Create graphs directory
-    os.makedirs("data/processed/graphs", exist_ok=True)
-    
-    plot_price_history(df, SELECTED_TICKER, 
-                      save_path="data/processed/graphs/0_price_history.png")
-    plot_returns_distribution(df, SELECTED_TICKER,
-                             save_path="data/processed/graphs/0_returns_distribution.png")
+    plot_price_history(df, SELECTED_TICKER)
     
     
     # ========== STEP 3: CREATE FEATURES ==========
@@ -89,7 +81,7 @@ def main():
     print("="*70)
     
     models = create_models()
-    models, scaler = train_models(models, X_train, y_train)
+    models = train_models(models, X_train, y_train)
     
     
     # ========== STEP 6: MAKE PREDICTIONS ==========
@@ -97,7 +89,7 @@ def main():
     print("STEP 6: Make Predictions")
     print("="*70)
     
-    predictions = predict(models, X_test, scaler)
+    predictions = predict(models, X_test)
     print("Predictions generated for all models")
     
     
@@ -114,7 +106,7 @@ def main():
     print(results_df.to_string(index=False))
     
     # Save results
-    save_results(results_df)
+    save_evaluation_results(results_df)
     
     
     # ========== STEP 8: CREATE VISUALIZATIONS ==========
@@ -122,35 +114,25 @@ def main():
     print("STEP 8: Create Visualizations")
     print("="*70)
     
-    # Create output directory for graphs
-    os.makedirs("data/processed/graphs", exist_ok=True)
-    
     # 1. Predictions vs Actual
     print("\nCreating predictions plot...")
-    plot_predictions(y_test, predictions, SELECTED_TICKER, 
-                    save_path="data/processed/graphs/1_predictions.png")
+    plot_predictions(y_test, predictions, SELECTED_TICKER)
     
     # 2. Prediction Errors Over Time
     print("Creating prediction errors plot...")
-    plot_prediction_errors(y_test, predictions, SELECTED_TICKER,
-                          save_path="data/processed/graphs/2_prediction_errors.png")
+    plot_prediction_errors(y_test, predictions, SELECTED_TICKER)
     
     # 3. Error Distribution
     print("Creating error distribution plot...")
-    plot_error_distribution(y_test, predictions,
-                           save_path="data/processed/graphs/3_error_distribution.png")
+    plot_error_distribution(y_test, predictions)
     
     # 4. Model Comparison
     print("Creating model comparison plot...")
-    plot_model_comparison(results_df,
-                         save_path="data/processed/graphs/4_model_comparison.png")
+    plot_model_comparison(results_df)
     
     # 5. Actual vs Predicted Scatter
     print("Creating scatter plots...")
-    plot_actual_vs_predicted_scatter(y_test, predictions,
-                                     save_path="data/processed/graphs/5_scatter_plots.png")
-    
-    print("\n✅ All 5 graphs saved in data/processed/graphs/")
+    plot_actual_vs_predicted_scatter(y_test, predictions)
     
     
     # ========== STEP 9: GENERATE REPORT ==========
