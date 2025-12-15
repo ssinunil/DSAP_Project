@@ -1,38 +1,101 @@
 # Forecasting Swiss Stock Prices using ML Models
 
 ## Research Question
-Which classification model performs best for Iris species:
-Random Forest, K-Nearest Neighbors, or Logistic Regression?
+
+Which regression model performs best for predicting Swiss stock prices:
+Ridge Regression, Random Forest, or XGBoost?
+
+## Project Overview
+
+This project implements a machine learning pipeline to predict next-day stock prices for Swiss companies listed on the SIX Swiss Exchange. The system uses percentage-based features and predicts daily returns, which are then converted back to absolute prices for evaluation.
+
+**Key Innovation**: Instead of predicting absolute prices (which suffer from multi-collinearity), we predict percentage changes and reconstruct prices, leading to better generalization across different stocks.
 
 ## Setup
 
-# Create environment
+### Create Environment
+
+```bash
+# Create conda environment
 conda env create -f environment.yml
-conda activate iris-project
+conda activate dsap-project
+
+### Download Data
+
+The data is automatically downloaded from Yahoo Finance when you run the script. The following Swiss stocks are available:
+
+- NESN.SW (Nestlé)
+- UBSG.SW (UBS Group)
+- NOVN.SW (Novartis)
+- ROG.SW (Roche)
+- ABBN.SW (ABB)
 
 ## Usage
 
-python main.py
+### Run Full Pipeline
 
-Expected output: Accuracy comparison between three models.
+```bash
+python main.py
+```
+
+Expected output:
+- Downloaded data for 5 Swiss stocks (2018-2024)
+- Feature engineering (14 percentage-based features)
+- Model training with normalization
+- Evaluation metrics (MAE, RMSE, MAPE, R²)
+- 5 visualization plots saved in `data/plots/`
+
+### Change Stock Selection
+
+Edit `main.py` line ~33:
+
+```python
+SELECTED_TICKER = 'UBSG.SW'  # Change to any ticker in TICKERS list
+```
+
 
 ## Project Structure
 
-my-iris-comparison/
-├── main.py              # Main entry point
-├── src/                 # Source code
-│   ├── data_loader.py   # Data loading/preprocessing
-│   ├── models.py        # Model training
-│   └── evaluation.py    # Evaluation metrics
-├── results/             # Output plots and metrics
-└── environment.yml      # Dependencies
+```
+ss_project/
+├── main.py                      # Main entry point
+├── src/                         # Source code
+│   ├── data_loading.py          # Data download/loading 
+│   ├── feature_engineering.py   # Feature creation (% changes approach)
+│   ├── models.py                # Model training with StandardScaler
+│   ├── evaluation.py            # Evaluation metrics and plots
+│   └── utils.py                 # Data exploration utilities
+├── data/
+│   ├── raw/                     # Downloaded CSV files
+│   ├── processed/               # Processed features and results
+│   └── plots/                   # Generated visualizations
+└── environment.yml              # Dependencies
+
+```
+
 
 ## Results
-- Random Forest: 0.967 accuracy
-- KNN: 0.933 accuracy
-- Logistic Regression: 0.967 accuracy
-- Winner: Tie between Random Forest and Logistic Regression
+
+### Performance on UBS (UBSG.SW)
+
+**Test Period**: 2023-2024 (500 trading days)  
+**Price Range**: 15.19 - 27.85 CHF
+
+| Model          | MAE (CHF) | RMSE (CHF) | MAPE (%) | R²     |
+|----------------|-----------|------------|----------|--------|
+| Ridge          | 0.26      | 0.38       | **1.19** | 0.996  |
+| Random Forest  | 0.27      | 0.39       | 1.24     | 0.995  |
+| XGBoost        | 0.29      | 0.40       | 1.31     | 0.994  |
+
+**Winner**: Ridge Regression (MAPE: 1.19%)
 
 ## Requirements
-- Python 3.11
-- scikit-learn, pandas, matplotlib, seaborn
+
+- Python 3.11+
+- pandas >= 1.5.0
+- numpy >= 1.24.0
+- yfinance >= 0.2.0
+- scikit-learn >= 1.3.0
+- xgboost >= 2.0.0
+- matplotlib >= 3.7.0
+- seaborn >= 0.12.0
