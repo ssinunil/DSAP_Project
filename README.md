@@ -19,6 +19,7 @@ This project implements a machine learning pipeline to predict next-day stock pr
 # Create conda environment
 conda env create -f environment.yml
 conda activate dsap-project
+```
 
 ### Download Data
 
