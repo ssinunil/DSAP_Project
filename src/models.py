@@ -1,9 +1,10 @@
 """
 Machine learning models for stock prediction.
 """
-
-from sklearn.linear_model import Ridge
+import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import Ridge
+from sklearn.preprocessing import StandardScaler
 from xgboost import XGBRegressor
 
 
@@ -24,32 +25,86 @@ def split_train_test(X, y, train_end_date='2022-12-31'):
 
 
 def create_models():
-    """Create the 3 models."""
+    """
+    Create the 3 models with AGGRESSIVE hyperparameters.
+    
+    CORRECTION: Hyperparamètres beaucoup plus agressifs pour forcer
+    les modèles à capturer la vraie variance des prix.
+    """
     models = {
-        'Ridge': Ridge(alpha=1.0),
-        'RandomForest': RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42),
-        'XGBoost': XGBRegressor(n_estimators=100, max_depth=5, learning_rate=0.1, random_state=42)
+        'Ridge': Ridge(alpha=0.1),  
+        
+        'RandomForest': RandomForestRegressor(
+            n_estimators=500,           
+            max_depth=None,             
+            min_samples_split=2,        
+            min_samples_leaf=1,         
+            max_features='sqrt',        
+            bootstrap=True,             
+            random_state=42,
+            n_jobs=-1                   
+        ),
+        
+        
+        'XGBoost': XGBRegressor(
+            n_estimators=500,           
+            max_depth=8,                
+            learning_rate=0.1,          
+            min_child_weight=1,         
+            subsample=0.9,              
+            colsample_bytree=0.9,      
+            gamma=0,                    
+            reg_alpha=0,                
+            reg_lambda=0.1,             
+            random_state=42,
+            n_jobs=-1
+        )
     }
     return models
 
 
 def train_models(models, X_train, y_train):
-    """Train all models."""
+    """
+    Train all models with automatic feature normalization.
+    """
     print("\nTraining models...")
+    
+    print("  Normalizing features...")
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    
+    X_train_scaled = pd.DataFrame(
+        X_train_scaled,
+        index=X_train.index,
+        columns=X_train.columns
+    )
+    
+    print("  ✓ Features normalized (mean≈0, std≈1)")
     
     for name, model in models.items():
         print(f"  Training {name}...")
-        model.fit(X_train, y_train)
+        model.fit(X_train_scaled, y_train)
     
     print("All models trained!")
-    return models
+    
+    return models, scaler
 
 
-def predict(models, X_test):
-    """Make predictions with all models."""
+def predict(models, X_test, scaler):
+    """
+    Make predictions with all models.
+    """
     predictions = {}
     
+    X_test_scaled = scaler.transform(X_test)
+    
+    X_test_scaled = pd.DataFrame(
+        X_test_scaled,
+        index=X_test.index,
+        columns=X_test.columns
+    )
+    
     for name, model in models.items():
-        predictions[name] = model.predict(X_test)
+        predictions[name] = model.predict(X_test_scaled)
     
     return predictions
