@@ -5,6 +5,7 @@ Main script for Swiss stock price prediction project.
 
 import sys
 import warnings
+import pandas as pd
 
 sys.path.append('src')
 
@@ -29,7 +30,7 @@ def main():
     
     # ========== CONFIGURATION ==========
     TICKERS = ['NESN.SW', 'UBSG.SW', 'NOVN.SW', 'ROG.SW', 'ABBN.SW']
-    SELECTED_TICKER = 'NESN.SW'
+    SELECTED_TICKER = 'UBSG.SW'
     
     START_DATE = "2018-01-01"
     END_DATE = "2024-12-31"
@@ -60,7 +61,7 @@ def main():
     print("STEP 3: Create Features")
     print("="*70)
     
-    X, y = prepare_features(df, lags=[1, 2, 3, 5, 10])
+    X, y, current_prices = prepare_features(df)
     
     print("\nFeatures created:")
     for i, col in enumerate(X.columns, 1):
@@ -81,7 +82,7 @@ def main():
     print("="*70)
     
     models = create_models()
-    models = train_models(models, X_train, y_train)
+    models, scaler = train_models(models, X_train, y_train)
     
     
     # ========== STEP 6: MAKE PREDICTIONS ==========
@@ -89,7 +90,22 @@ def main():
     print("STEP 6: Make Predictions")
     print("="*70)
     
-    predictions = predict(models, X_test)
+    predictions = predict(models, X_test, scaler)
+    
+    predictions_prices = {}
+    prices_test = current_prices[~(X.index <= TRAIN_END_DATE)]
+    for name, pred_pct in predictions.items():
+        predictions_prices[name] = prices_test.values * (1 + pred_pct)
+
+    y_test_prices = pd.Series(
+        prices_test.values * (1 + y_test.values),
+        index=prices_test.index,
+        name='target'
+    )
+
+    predictions = predictions_prices
+    y_test = y_test_prices
+
     print("Predictions generated for all models")
     
     
