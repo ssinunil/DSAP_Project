@@ -79,18 +79,18 @@ ss_project/
 
 ## Results
 
-### Performance on UBS (UBSG.SW)
+### Performance on Nestlé (NESN.SW)
 
 **Test Period**: 2023-2024 (500 trading days)  
-**Price Range**: 15.19 - 27.85 CHF
+**Price Range**: 71.42 - 108.88 CHF
 
 | Model          | MAE (CHF) | RMSE (CHF) | MAPE (%) | R²     |
 |----------------|-----------|------------|----------|--------|
-| Ridge          | 0.26      | 0.38       | **1.19** | 0.996  |
-| Random Forest  | 0.27      | 0.39       | 1.24     | 0.995  |
-| XGBoost        | 0.29      | 0.40       | 1.31     | 0.994  |
+| Ridge          | 0.66      | 0.91       | **0.72** | -0.09  |
+| Random Forest  | 0.68      | 0.93       | 0.74     | -0.07  |
+| XGBoost        | 0.72      | 0.95       | 0.78     | -0.07  |
 
-**Winner**: Ridge Regression (MAPE: 1.19%)
+**Winner**: Ridge Regression (MAPE: 0.72%)
 
 ## Requirements
 
