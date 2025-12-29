@@ -60,8 +60,11 @@ SELECTED_TICKER = 'UBSG.SW'  # Change to any ticker in TICKERS list
 ```
 ss_project/
 ├── main.py                      # Main entry point
+├── README.md                    # Project documentation
+├── Proposal.md                  # Project proposal
+├── AI_USAGE.md                  # AI usage and disclosure
 ├── src/                         # Source code
-│   ├── data_loading.py          # Data download/loading 
+│   ├── data_loading.py          # Data download/loading
 │   ├── feature_engineering.py   # Feature creation (% changes approach)
 │   ├── models.py                # Model training with StandardScaler
 │   ├── evaluation.py            # Evaluation metrics and plots
@@ -71,7 +74,6 @@ ss_project/
 │   ├── processed/               # Processed features and results
 │   └── plots/                   # Generated visualizations
 └── environment.yml              # Dependencies
-
 ```
 
 
